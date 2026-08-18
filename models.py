@@ -334,8 +334,9 @@ def get_pullback_config() -> StrategyConfig:
         take_profit_atr_mult=2.0,
         use_trailing_stop=False,
         use_trend_reversal_exit=False,
-        contracts_per_trade=10,
-        contracts_per_trade_high_vol=5,
+        contracts_per_trade=1,
+        contracts_per_trade_high_vol=1,  # 2026-08-18: pinned to 1 contract always — clean per-trade
+                                          # point data for gauging MES sizing later (multiply by 10)
         post_exit_cooldown_bars=2,
         max_loss_per_day_pct=100.0,  # daily loss limit removed 2026-08-18 — paper trading, want losing trades to play out
         min_take_profit_pts=10.75,  # ratio target was 8.0*(2.0/1.5)=10.67, rounded to nearest ES tick (0.25)
