@@ -185,6 +185,12 @@ class StrategyConfig:
     trailing_activation_atr_mult: float = 1.25
     trailing_distance_atr_mult: float = 0.75
     min_stop_loss_pts: float = 8.0   # SL floor — prevents stop shrinking below viable level in low ATR
+    # TP floor — added 2026-08-18. Without this, low-ATR sessions hit the SL
+    # floor above but let TP shrink freely with ATR, flipping the intended
+    # stop_loss_atr_mult:take_profit_atr_mult ratio backwards (observed as
+    # low as 1:0.4 reward:risk on 8/18 pullback trades). 0.0 = no floor
+    # (default, unaffected unless a preset sets one).
+    min_take_profit_pts: float = 0.0
 
     atr_no_trade_threshold: float = 3.0  # don't enter if ATR below this (market too compressed)
 
@@ -331,6 +337,8 @@ def get_pullback_config() -> StrategyConfig:
         contracts_per_trade=10,
         contracts_per_trade_high_vol=5,
         post_exit_cooldown_bars=2,
+        max_loss_per_day_pct=100.0,  # daily loss limit removed 2026-08-18 — paper trading, want losing trades to play out
+        min_take_profit_pts=10.75,  # ratio target was 8.0*(2.0/1.5)=10.67, rounded to nearest ES tick (0.25)
     )
 
 
