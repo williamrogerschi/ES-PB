@@ -1,0 +1,36 @@
+Logging to: es_bot_20260817_210158.log
+
+============================================================
+🔁 MODE: TREND PULLBACK
+   • 10 contract(s) max
+   • No directional bias — longs and shorts, same logic
+   • Entry: RSI dip/bounce turning back toward the trend
+   • SL: 1.5x ATR | TP: 2.0x ATR | No trailing stop
+   • Not yet validated out-of-sample — shadow-log before trusting live
+============================================================
+✓ Connected to IBKR (paper) - clientId=11
+✓ Front-month contract: ESU6 expiry=20260918
+
+============================================================
+Loading historical data for indicator warm-up...
+============================================================
+→ Fetching historical bars (1 D, 1 min)...
+✓ Loaded 182 historical bars
+
+Processing 182 historical bars...
+Still need more bars. Have 182, need ~200
+
+------------------------------------------------------------
+Account Value: $1,005,103.42
+Buying Power: $4,007,527.82
+Current Position: 0 contracts
+------------------------------------------------------------
+
+============================================================
+Starting live 1-minute bar stream...
+Strategy is now ACTIVE (PULLBACK mode)
+============================================================
+
+→ Subscribed to 5-second real-time bars (aggregating to 1 min)
+→ Real-time bars cancelled
+✓ Disconnected from IBKR

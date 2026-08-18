@@ -1,0 +1,93 @@
+Logging to: es_bot_20260814_130554.log
+
+============================================================
+🔁 MODE: TREND PULLBACK
+   • 10 contract(s) max
+   • No directional bias — longs and shorts, same logic
+   • Entry: RSI dip/bounce turning back toward the trend
+   • SL: 1.5x ATR | TP: 2.0x ATR | No trailing stop
+   • Not yet validated out-of-sample — shadow-log before trusting live
+============================================================
+✓ Connected to IBKR (paper) - clientId=11
+✓ Front-month contract: ESU6 expiry=20260918
+
+============================================================
+Loading historical data for indicator warm-up...
+============================================================
+→ Fetching historical bars (1 D, 1 min)...
+✓ Loaded 1146 historical bars
+
+Processing 1146 historical bars...
+
+Indicators ready!
+  Bars loaded: 1146
+  Last price: 7800.75
+  Trend: strong_bearish
+  RSI: 48.8
+  ATR: 1.50
+  MACD: -1.27 / Signal: -1.43
+  MA: 7801.00 / 7804.70 / 7810.64
+
+------------------------------------------------------------
+Account Value: $1,010,614.99
+Buying Power: $4,032,775.91
+Current Position: 0 contracts
+------------------------------------------------------------
+
+============================================================
+Starting live 1-minute bar stream...
+Strategy is now ACTIVE (PULLBACK mode)
+============================================================
+
+→ Subscribed to 5-second real-time bars (aggregating to 1 min)
+
+[2026-08-14 12:05] O:7800.75 H:7800.75 L:7800.25 C:7800.25 V:130.0
+  📈 Trend: sideways (raw: strong_bearish) | 🌍 Regime: trending_bearish
+  🗺️  Grid: 0.100% | 🔺 7801.75 🔻 7800.00
+  📡 RSI: 47.7 | MACD: -1.20 | ATR: 1.45
+  📊 Filled: 0 | Pending: 0
+  💰 Daily P&L: $+0.00
+
+[2026-08-14 12:06] O:7800.25 H:7801.25 L:7800.25 C:7800.25 V:1000.0
+  📈 Trend: sideways (raw: strong_bearish) | 🌍 Regime: trending_bearish
+  🗺️  Grid: 0.100% | 🔺 7800.75 🔻 7800.25
+  📡 RSI: 50.0 | MACD: -1.13 | ATR: 1.38
+  📊 Filled: 0 | Pending: 0
+  💰 Daily P&L: $+0.00
+
+[2026-08-14 12:07] O:7800.50 H:7802.00 L:7800.50 C:7801.50 V:1303.0
+  📈 Trend: strong_bearish | 🌍 Regime: trending_bearish
+  🗺️  Grid: 0.100% | 🔺 7801.25 🔻 7800.25
+  📡 RSI: 50.0 | MACD: -0.97 | ATR: 1.41
+  📊 Filled: 0 | Pending: 0
+  💰 Daily P&L: $+0.00
+
+[2026-08-14 12:08] O:7801.50 H:7801.50 L:7800.25 C:7801.50 V:879.0
+  📈 Trend: strong_bearish (raw: moderate_bearish) | 🌍 Regime: trending_bearish
+  🗺️  Grid: 0.100% | 🔺 7802.00 🔻 7800.50
+  📡 RSI: 48.8 | MACD: -0.83 | ATR: 1.45
+  📊 Filled: 0 | Pending: 0
+  💰 Daily P&L: $+0.00
+
+[2026-08-14 12:09] O:7801.50 H:7801.50 L:7800.50 C:7801.00 V:786.0
+  📈 Trend: strong_bearish | 🌍 Regime: trending_bearish
+  🗺️  Grid: 0.100% | 🔺 7801.50 🔻 7800.25
+  📡 RSI: 45.2 | MACD: -0.75 | ATR: 1.41
+  📊 Filled: 0 | Pending: 0
+  💰 Daily P&L: $+0.00
+
+[2026-08-14 12:10] O:7801.25 H:7801.75 L:7800.75 C:7801.25 V:873.0
+  📈 Trend: strong_bearish (raw: moderate_bearish) | 🌍 Regime: ranging
+  🗺️  Grid: 0.100% | 🔺 7801.50 🔻 7800.50
+  📡 RSI: 51.3 | MACD: -0.66 | ATR: 1.39
+  📊 Filled: 0 | Pending: 0
+  💰 Daily P&L: $+0.00
+
+[2026-08-14 12:11] O:7801.00 H:7803.50 L:7800.50 C:7802.50 V:1780.0
+  📈 Trend: strong_bearish (raw: moderate_bearish) | 🌍 Regime: ranging
+  🗺️  Grid: 0.100% | 🔺 7801.75 🔻 7800.75
+  📡 RSI: 69.4 | MACD: -0.48 | ATR: 1.43
+  📊 Filled: 0 | Pending: 0
+  💰 Daily P&L: $+0.00
+→ Real-time bars cancelled
+✓ Disconnected from IBKR
