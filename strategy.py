@@ -574,11 +574,13 @@ class GridStrategy:
         bear_trends = [TrendState.STRONG_BEARISH, TrendState.MODERATE_BEARISH]
 
         if trend in bull_trends and rsi_prev < dip_level and rsi > rsi_prev:
+            entry_price = current_price + self.config.pullback_entry_offset_pts
             print(f"  🟢 Pullback LONG | RSI {rsi_prev:.1f}→{rsi:.1f} turning up in {trend.value}")
-            await self._enter_long(current_price, rsi, trend)
+            await self._enter_long(entry_price, rsi, trend)
         elif trend in bear_trends and rsi_prev > (100 - dip_level) and rsi < rsi_prev:
+            entry_price = current_price - self.config.pullback_entry_offset_pts
             print(f"  🔴 Pullback SHORT | RSI {rsi_prev:.1f}→{rsi:.1f} turning down in {trend.value}")
-            await self._enter_short(current_price, rsi, trend)
+            await self._enter_short(entry_price, rsi, trend)
 
         self._pullback_prev_rsi = rsi
 

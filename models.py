@@ -122,6 +122,16 @@ class StrategyConfig:
     # Revisit if this lets through too much noise once live data comes in.
     # -------------------------------------------------------------------------
     min_atr_for_pullback_entry: float = 1.0
+    # -------------------------------------------------------------------------
+    # pullback_entry_offset_pts — added 2026-08-18.
+    # Pullback entries were submitted as a limit at the exact signal price,
+    # which only fills if price ticks back toward the signal bar first. On
+    # trending days (8/17, 8/18) that never happened and every signal timed
+    # out unfilled. Offsetting the limit through the market makes it
+    # marketable — fills near signal price instead of waiting for a
+    # retracement that a strong trend may not give.
+    # -------------------------------------------------------------------------
+    pullback_entry_offset_pts: float = 1.5
 
     # MA settings
     short_ma_length: int = 20
