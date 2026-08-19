@@ -329,9 +329,18 @@ def get_pullback_config() -> StrategyConfig:
         max_positions=1,
         rsi_pullback_dip_level=38.0,
         min_atr_for_pullback_entry=1.0,  # lowered from 2.5 on 2026-08-17, see note above
-        use_atr_rr=True,
-        stop_loss_atr_mult=1.5,
-        take_profit_atr_mult=2.0,
+        # -------------------------------------------------------------------
+        # SL/TP — switched from ATR-scaled to plain static on 2026-08-19.
+        # At recent ATR (median ~1.5-2.7), 1.5x/2.0x ATR always landed below
+        # the SL/TP floors anyway, so the floors were doing 100% of the work
+        # and the multipliers were dead weight — two mechanisms, only one
+        # ever active, easy to get out of sync (which is exactly what
+        # happened: TP floor got added but a stale file kept using the ATR
+        # formula). Static values remove the ambiguity entirely.
+        # -------------------------------------------------------------------
+        use_atr_rr=False,
+        stop_loss_pts=8.0,
+        take_profit_pts=10.75,  # 8.0 * (2.0/1.5), rounded to nearest ES tick — 1.33:1 R:R
         use_trailing_stop=False,
         use_trend_reversal_exit=False,
         contracts_per_trade=1,
@@ -339,7 +348,6 @@ def get_pullback_config() -> StrategyConfig:
                                           # point data for gauging MES sizing later (multiply by 10)
         post_exit_cooldown_bars=2,
         max_loss_per_day_pct=100.0,  # daily loss limit removed 2026-08-18 — paper trading, want losing trades to play out
-        min_take_profit_pts=10.75,  # ratio target was 8.0*(2.0/1.5)=10.67, rounded to nearest ES tick (0.25)
     )
 
 

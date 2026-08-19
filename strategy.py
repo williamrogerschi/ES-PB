@@ -773,6 +773,7 @@ class GridStrategy:
                         sl_pts = pending.entry_atr * self.config.stop_loss_atr_mult
                         sl_pts = max(sl_pts, self.config.min_stop_loss_pts)
                         tp_pts = pending.entry_atr * self.config.take_profit_atr_mult
+                        tp_pts = max(tp_pts, self.config.min_take_profit_pts)
                     else:
                         sl_pts = self.config.stop_loss_pts
                         tp_pts = self.config.take_profit_pts
@@ -785,18 +786,21 @@ class GridStrategy:
                 filled_qty = int(trade.orderStatus.filled)
                 oca_group = f"exit_{order_id}_{int(datetime.now(UTC).timestamp())}"
                 stop_action = 'SELL' if pending.side == 'long' else 'BUY'
-                offset = self.config.stop_limit_offset_pts
-                if pending.side == 'long':
-                    stop_limit_price = self._round_to_tick(stop_loss - offset)
-                else:
-                    stop_limit_price = self._round_to_tick(stop_loss + offset)
-                stop_trade = await self.broker.place_stop_limit_order(
-                    stop_action, filled_qty, stop_loss, stop_limit_price, oca_group=oca_group)
+                # Stop-market, not stop-limit — 2026-08-19. A stop-limit order
+                # only fills within its limit price; if price gaps through the
+                # stop trigger by more than stop_limit_offset_pts, it's left
+                # open and unfilled while price keeps moving away (observed
+                # live). Stop-market has no limit — it triggers and takes
+                # whatever the market gives, which is what an SL is for.
+                stop_trade = await self.broker.place_stop_market_order(
+                    stop_action, filled_qty, stop_loss, oca_group=oca_group)
                 stop_order_id = stop_trade.order.orderId if stop_trade else None
                 tp_action = 'SELL' if pending.side == 'long' else 'BUY'
                 tp_trade = await self.broker.place_limit_order(
                     tp_action, filled_qty, take_profit, oca_group=oca_group)
                 tp_order_id = tp_trade.order.orderId if tp_trade else None
+                if stop_order_id and tp_order_id:
+                    self.broker.register_oca_pair(stop_order_id, tp_order_id)
                 trail_activation_pts = self.config.trailing_activation_pts  # static
                 position = Position(
                     side=pending.side,
@@ -884,7 +888,7 @@ class GridStrategy:
                 profit_pts = position.highest_price - position.entry_price
                 trail_activation = self.config.trailing_activation_pts
                 trail_distance    = self.config.trailing_distance_pts
-                if not position.trailing_activated and profit_pts >= trail_activation:
+                if self.config.use_trailing_stop and not position.trailing_activated and profit_pts >= trail_activation:
                     new_stop = self._round_to_tick(position.highest_price - trail_distance)
                     if new_stop > position.stop_loss:
                         old_stop = position.stop_loss
@@ -898,7 +902,7 @@ class GridStrategy:
                             print(f"  🔄 TRAILING ACTIVATED @ +{profit_pts:.2f}pts | Stop: {old_stop:.2f} → {new_stop:.2f}")
                         else:
                             print(f"  ⚠️ Trail activation failed — IBKR did not confirm stop move. Will retry next bar.")
-                elif position.trailing_activated:
+                elif self.config.use_trailing_stop and position.trailing_activated:
                     new_stop = self._round_to_tick(position.highest_price - trail_distance)
                     if new_stop > position.stop_loss:
                         old_stop = position.stop_loss
@@ -913,7 +917,7 @@ class GridStrategy:
                 profit_pts = position.entry_price - position.lowest_price
                 trail_activation = self.config.trailing_activation_pts
                 trail_distance    = self.config.trailing_distance_pts
-                if not position.trailing_activated and profit_pts >= trail_activation:
+                if self.config.use_trailing_stop and not position.trailing_activated and profit_pts >= trail_activation:
                     new_stop = self._round_to_tick(position.lowest_price + trail_distance)
                     if new_stop < position.stop_loss:
                         old_stop = position.stop_loss
@@ -927,7 +931,7 @@ class GridStrategy:
                             print(f"  🔄 TRAILING ACTIVATED @ +{profit_pts:.2f}pts | Stop: {old_stop:.2f} → {new_stop:.2f}")
                         else:
                             print(f"  ⚠️ Trail activation failed — IBKR did not confirm stop move. Will retry next bar.")
-                elif position.trailing_activated:
+                elif self.config.use_trailing_stop and position.trailing_activated:
                     new_stop = self._round_to_tick(position.lowest_price + trail_distance)
                     if new_stop < position.stop_loss:
                         old_stop = position.stop_loss
