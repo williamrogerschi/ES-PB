@@ -14,6 +14,7 @@ from indicators import Indicators
 
 UTC = ZoneInfo("UTC")
 CENTRAL = ZoneInfo("America/Chicago")
+EASTERN = ZoneInfo("America/New_York")
 
 
 class GridStrategy:
@@ -846,6 +847,24 @@ class GridStrategy:
             return fallback
         return sum(f.execution.price * f.execution.shares for f in fills) / total_qty
 
+    async def _check_eod_close(self, bar: Dict):
+        """Force-flatten any open position once a bar crosses the configured
+        ET close time. Independent of SL/TP/max_holding_hours — this fires
+        regardless of how those are set, for trades that are simply grinding
+        without hitting either bracket."""
+        if not self.config.use_eod_close or not self.positions:
+            return
+        bar_et = bar['time'].astimezone(EASTERN)
+        close_reached = (bar_et.hour, bar_et.minute) >= (self.config.eod_close_hour_et, self.config.eod_close_minute_et)
+        if not close_reached:
+            return
+        for position in list(self.positions):
+            if position.stop_order_id:
+                await self.broker.cancel_order_by_id(position.stop_order_id)
+            if position.tp_order_id:
+                await self.broker.cancel_order_by_id(position.tp_order_id)
+            await self._close_position(position, bar['close'], "EOD Close")
+
     async def _check_exits(self, bar: Dict):
         high = bar['high']
         low = bar['low']
@@ -1131,6 +1150,7 @@ class GridStrategy:
                 await self._close_position(position, bar['close'], "Max Daily Loss")
             return
         await self._check_exits(bar)
+        await self._check_eod_close(bar)
         if self.config.use_grid_entry:
             if self.grid_levels and self.grid_anchor_price:
                 await self._check_entries(bar)

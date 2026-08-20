@@ -168,6 +168,16 @@ class StrategyConfig:
     time_based_exit: bool = True
     max_holding_hours: int = 4
 
+    # -------------------------------------------------------------------------
+    # EOD hard close — added 2026-08-20. Independent of max_holding_hours:
+    # a trade can sit well under the holding-hours cap and still be open past
+    # market close if it's just grinding sideways. This force-flattens any
+    # open position the instant a bar crosses the close time, no exceptions.
+    # -------------------------------------------------------------------------
+    use_eod_close: bool = False
+    eod_close_hour_et: int = 16     # 4:00 PM ET (RTH close)
+    eod_close_minute_et: int = 0
+
     # Position sizing
     use_risk_based_position: bool = False
     risk_per_trade_pct: float = 1.0
@@ -348,6 +358,7 @@ def get_pullback_config() -> StrategyConfig:
                                           # point data for gauging MES sizing later (multiply by 10)
         post_exit_cooldown_bars=2,
         max_loss_per_day_pct=100.0,  # daily loss limit removed 2026-08-18 — paper trading, want losing trades to play out
+        use_eod_close=True,  # force-flatten any open position at 4:00 PM ET, added 2026-08-20
     )
 
 
