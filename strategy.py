@@ -900,6 +900,30 @@ class GridStrategy:
                 print(f"  {emoji} EXIT {position.side.upper()} @ {exit_price:.2f} | {exit_reason}")
                 print(f"     P&L: {pnl_pts:+.2f} pts (${pnl_dollars:+,.2f}) | Daily: ${self.daily_pnl:+,.2f}")
                 positions_to_remove.append(position)
+                # -------------------------------------------------------------
+                # Own-bracket double-fill check — 2026-08-25. Replaces the old
+                # broker.get_position() reconciliation, which compared this
+                # bot's expected exposure against the ACCOUNT-WIDE position.
+                # IBKR reports positions per account, not per client
+                # connection — with two bots sharing an account and contract,
+                # that check couldn't tell "my extra fill" from "the other
+                # bot's legitimate position" and was firing corrective trades
+                # against trades that weren't even this bot's. This version
+                # only ever looks at this bot's own two order IDs (which it
+                # placed and knows), so it can never be confused by the other
+                # bot's activity.
+                # -------------------------------------------------------------
+                if order_to_cancel and order_to_cancel in self.broker._filled_orders:
+                    other_fill = self.broker._filled_orders.pop(order_to_cancel)
+                    other_price = self._weighted_avg_fill(
+                        other_fill.fills,
+                        position.take_profit if exit_reason != "Take Profit" else position.stop_loss
+                    )
+                    size = int(position.size)
+                    flatten_action = 'BUY' if position.side == 'long' else 'SELL'
+                    print(f"  ⚠️ OWN BRACKET DOUBLE-FILL: both SL #{position.stop_order_id} and TP #{position.tp_order_id} filled "
+                          f"(second fill @ {other_price:.2f}) — flattening {size} contract(s) with {flatten_action}")
+                    await self.broker.place_market_order(flatten_action, size)
                 continue
             if position.side == 'long':
                 if position.highest_price is None or high > position.highest_price:
@@ -983,23 +1007,6 @@ class GridStrategy:
                 self.positions.remove(position)
                 self.position_count = max(0, self.position_count - 1)
                 self.bars_since_exit = 0
-
-        if positions_to_remove:
-            try:
-                actual = self.broker.get_position()
-                expected = sum(
-                    int(p.size) if p.side == 'long' else -int(p.size)
-                    for p in self.positions
-                )
-                if actual != expected:
-                    print(f"  ⚠️ POSITION MISMATCH after exit: broker={actual}, bot expects={expected}")
-                    stray = actual - expected
-                    if stray != 0:
-                        flat_action = 'SELL' if stray > 0 else 'BUY'
-                        print(f"  🛟 Flattening stray {stray} contract(s) with {flat_action} to restore expected exposure")
-                        await self.broker.place_market_order(flat_action, abs(stray))
-            except Exception as e:
-                print(f"  ⚠️ Position reconciliation check failed: {e}")
 
     def _should_exit_on_trend_reversal(self, position: Position) -> bool:
         trend = self.confirmed_trend
